@@ -30,6 +30,14 @@ Icon Sources (Overview)
   - Copyright (c) 2008 Dan Rabbit
   - License: GPLv2+
 
+- Endeavour OS icon
+  - Source: https://github.com/endeavouros-team/artwork-images-logo/blob/master/endeavouros-icon.png
+  - License: GPLv3
+
+- Manjaro OS icon
+  - Source: https://commons.wikimedia.org/wiki/File:Manjaro-logo.svg
+  - Public domain
+
 - Ubuntu "animal" icons (through os_xenial.png)
   - Source: https://wiki.ubuntu.com/Artwork/Official
   - Copyright (c) 2014-2017 Canonical Ltd.
@@ -39,6 +47,11 @@ Icon Sources (Overview)
   - Source: frank.heimes.canonical.com
   - Copyright (c) 2017-2018 Canonical Ltd.
   - License: CC-BY-SA-3.0
+
+- Ubuntu standard icon (os_ubuntu.png)
+  - Source: https://logos.fandom.com/wiki/Ubuntu?file=Ubuntu_%25282022%2529.svg
+  - Copyright (c) 2022 Canonical Ltd.
+  - License: CC-BY-SA 3.0
 
 - Void Linux icon
   - Source: https://commons.wikimedia.org/wiki/File:Void_Linux_logo.svg
@@ -67,7 +80,7 @@ os_lubuntu.png -- AwOken/clear/128x128/start-here/start-here-lubuntu.png
 os_mageia.png -- AwOken/clear/128x128/start-here/start-here-mageia.png
 os_mandriva.png -- AwOken/clear/128x128/start-here/start-here-mandriva5.png
 os_network.png -- AwOken/clear/128x128/places/network-workgroup1.png
-os_ubuntu.png -- AwOken/clear/128x128/start-here/start-here-ubuntu.png
+os_uefi.png -- AwOkenWhite/clear/128x128/start-here/start-here-umbrella3.png
 os_unknown.png -- AwOken/clear/128x128/actions/color-line1.png
 os_win8.png -- AwOken/clear/128x128/apps/live1.png
 
@@ -78,6 +91,8 @@ arrow_left.png -- AwOken/clear/128x128/actions/go-previous.png
 arrow_right.png -- AwOken/clear/128x128/actions/go-next.png
 boot_linux.png -- AwOken/clear/128x128/apps/supertux.png
 func_about.png -- AwOkenWhite/clear/128x128/actions/info2.png
+func_install.png -- AwOken/AwOkenWhite/clear/24x24/actions/document-import.png
+func_bootorder.png -- AwOkenWhite/clear/128x128/actions/format-list-ordered.png
 func_exit.png -- AwOkenWhite/clear/128x128/actions/application-exit2.png
 func_firmware.png -- AwOkenWhite/clear/128x128/status/indicator-cpufreq.png
 func_reset.png -- AwOkenWhite/clear/128x128/apps/gnome-session-reboot2.png
@@ -95,6 +110,7 @@ os_xubuntu.png -- AwOkenWhite/clear/128x128/start-here/start-here-xubuntu1.png
 tool_mok_tool.png -- AwOkenWhite/clear/128x128/apps/gnome-keyring-manager.png
 tool_netboot.png -- AwOken/clear/128x128/places/network-workgroup1.png
 tool_shell.png -- AwOken/clear/128x128/apps/terminal3.png
+vol_efi.png -- AwOkenWhite/clear/128x128/status/indicator-cpufreq.png
 vol_external.png -- AwOkenWhite/clear/128x128/devices/drive-removable-media-usb2.png
 vol_internal.png -- AwOken/clear/128/128/drive-harddisk/Internal.png
 vol_net.png -- AwOken/clear/128/128/drive-harddisk/Server.png
@@ -116,9 +132,15 @@ Modified Void Linux icon:
 os_void.png (public domain)
 
 
-Modified Ubuntu "animal" icons:
+Modified EndeavourOS icon:
+
+os_endeavouros.png
+
+
+Modified Ubuntu icons:
 
 os_trusty.png
+os_ubuntu.png
 os_xenial.png
 os_zesty.png
 
@@ -163,6 +185,9 @@ CC-SA 3.0: Creative Commons Legal Code.html
 
 GPLv2: gpl-2.0.txt
        (see also https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+
+GPLv3: gpl-3.0.txt
+        (see also https://www.gnu.org/licenses/gpl-3.0.html)
 
 LGPLv3: lgpl-3.0.txt
         (see also http://www.gnu.org/licenses/lgpl-3.0.en.html)

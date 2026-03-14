@@ -12,6 +12,16 @@
 #
 timeout 5
 
+# Set the logging level. When set to 0, rEFInd does not log its actions.
+# When set to 1 or above, rEFInd creates a file called refind.log in
+# its home directory on the ESP and records information about what it's
+# doing. Higher values record more information, up to a maximum of 4.
+# This token should be left at the default of 0 except when debugging
+# problems.
+# Default value is 0
+#
+#log_level 1
+
 # Normally, when the timeout period has passed, rEFInd boots the
 # default_selection. If the following option is uncommented, though,
 # rEFInd will instead attempt to shut down the computer.
@@ -36,7 +46,7 @@ timeout 5
 # variables.
 # Default is true
 #
-#use_nvram false
+use_nvram false
 
 # Screen saver timeout; the screen blanks after the specified number of
 # seconds with no keyboard input. The screen returns after most keypresses
@@ -92,6 +102,7 @@ timeout 5
 #banner hostname.bmp
 #banner mybanner.jpg
 #banner icons/snowy/banner-snowy.png
+banner background.png
 
 # Specify how to handle banners that aren't exactly the same as the screen
 # size:
@@ -99,7 +110,7 @@ timeout 5
 #  fillscreen  - Fill the screen
 # Default is noscale
 #
-#banner_scale fillscreen
+banner_scale fillscreen
 
 # Icon sizes. All icons are square, so just one value is specified. The
 # big icons are used for OS selectors in the first row and the small
@@ -160,9 +171,10 @@ timeout 5
 #
 #textmode 2
 
-# Set the screen's video resolution. Pass this option either:
-#  * two values, corresponding to the X and Y resolutions
-#  * one value, corresponding to a GOP (UEFI) video mode
+# Set the screen's video resolution. Pass this option one of the following:
+#  * two integer values, corresponding to the X and Y resolutions
+#  * one integer value, corresponding to a GOP (UEFI) video mode
+#  * the string "max", which sets the maximum available resolution
 # Note that not all resolutions are supported. On UEFI systems, passing
 # an incorrect value results in a message being shown on the screen to
 # that effect, along with a list of supported modes. On EFI 1.x systems
@@ -175,6 +187,7 @@ timeout 5
 #resolution 1024 768
 #resolution 1440 900
 #resolution 3
+#resolution max
 
 # Enable touch screen support. If active, this feature enables use of
 # touch screen controls (as on tablets). Note, however, that not all
@@ -201,7 +214,7 @@ timeout 5
 # Size of the mouse pointer, in pixels, per side.
 # Default is 16
 #
-#mouse_size
+#mouse_size 16
 
 # Speed of mouse tracking. Higher numbers equate to faster
 # mouse movement. This option requires that enable_mouse be
@@ -233,7 +246,8 @@ timeout 5
 #  shell            - the EFI shell (requires external program; see rEFInd
 #                     documentation for details)
 #  memtest          - the memtest86 program, in EFI/tools, EFI/memtest86,
-#                     EFI/memtest, EFI/tools/memtest86, or EFI/tools/memtest
+#                     EFI/memtest, EFI/tools/memtest86, EFI/tools/memtest,
+#                     or a boot loader's directory
 #  gptsync          - the (dangerous) gptsync.efi utility (requires external
 #                     program; see rEFInd documentation for details)
 #  gdisk            - the gdisk partitioning program
@@ -244,6 +258,9 @@ timeout 5
 #                     tool, MokManager.efi, used on Secure Boot systems
 #  csr_rotate       - adjusts Apple System Integrity Protection (SIP)
 #                     policy. Requires "csr_values" to be set.
+#  install          - an option to install rEFInd from the current location
+#                     to another ESP
+#  bootorder        - adjust the EFI's (NOT rEFInd's) boot order
 #  about            - an "about this program" option
 #  hidden_tags      - manage hidden tags
 #  exit             - a tag to exit from rEFInd
@@ -256,8 +273,17 @@ timeout 5
 #                     (or similar) program
 #  netboot          - launch the ipxe.efi tool for network (PXE) booting
 # Default is shell,memtest,gdisk,apple_recovery,windows_recovery,mok_tool,about,hidden_tags,shutdown,reboot,firmware,fwupdate
+# To completely disable scanning for all tools, provide a showtools line
+# with no options.
 #
-#showtools shell, gdisk, memtest, mok_tool, apple_recovery, windows_recovery, about, hidden_tags, reboot, exit, firmware, fwupdate
+#showtools shell, bootorder, gdisk, memtest, mok_tool, apple_recovery, windows_recovery, about, hidden_tags, reboot, exit, firmware, fwupdate
+
+# Additional directories to scan for tools. You may specify a directory
+# alone or a volume identifier plus pathname. The default is to scan no
+# extra directories, beyond EFI/tools and any directory in which an EFI
+# loader is found.
+#
+#also_scan_tool_dirs EFI/memtest,ESP2:/EFI/tools/memtest86
 
 # Tool binaries to be excluded from the tools line, even if the
 # general class is specified in showtools. This enables trimming an
@@ -297,6 +323,7 @@ timeout 5
 #  biosexternal  - BIOS external boot loaders (USB, eSATA, etc.)
 #  cd            - BIOS optical-disc boot loaders
 #  manual        - use stanzas later in this configuration file
+#  firmware      - boot EFI programs set in the firmware's NVRAM
 # Note that the legacy BIOS options require firmware support, which is
 # not present on all computers.
 # The netboot option is experimental and relies on the ipxe.efi and
@@ -304,7 +331,7 @@ timeout 5
 # On UEFI PCs, default is internal,external,optical,manual
 # On Macs, default is internal,hdbios,external,biosexternal,optical,cd,manual
 #
-#scanfor internal,external,optical,manual
+#scanfor internal,external,optical,manual,firmware
 
 # By default, rEFInd relies on the UEFI firmware to detect BIOS-mode boot
 # devices. This sometimes doesn't detect all the available devices, though.
@@ -334,10 +361,14 @@ timeout 5
 # a volume name and colon before the directory name, as in "myvol:/somedir"
 # to scan the somedir directory only on the filesystem named myvol. If a
 # specified directory doesn't exist, it's ignored (no error condition
-# results). The default is to scan the "boot" directory in addition to
-# various hard-coded directories.
+# results). The "+" symbol denotes appending to the list of scanned
+# directories rather than overwriting that list.
+# The default is to scan the "boot" and "@/boot" directories in addition
+# to various hard-coded directories.
 #
 #also_scan_dirs boot,ESP2:EFI/linux/kernels
+#also_scan_dirs boot,@/boot
+#also_scan_dirs +,@/kernels
 
 # Partitions (or whole disks, for legacy-mode boots) to omit from scans.
 # For EFI-mode scans, you normally specify a volume by its label, which you
@@ -390,8 +421,22 @@ timeout 5
 # TextMode.efi,ebounce.efi,GraphicsConsole.efi,MokManager.efi,HashTool.efi,
 # HashTool-signed.efi,bootmgr.efi,fb{arch}.efi
 # (where "{arch}" is the architecture code, like "x64").
+# If you want to keep these defaults but add to them, be sure to
+# specify "+" as the first item in the new list; if you don't, then
+# items from the default list are likely to appear.
 #
 #dont_scan_files shim.efi,MokManager.efi
+
+# EFI NVRAM Boot#### variables that should NOT be presented as loaders
+# when "firmware" is an option to "scanfor". The comma-separated list
+# presented here contains strings that are matched against the
+# description field -- if a value here is a case-insensitive substring
+# of the boot option description, then it will be excluded from the
+# boot list. To specify a string that includes a space, enclose it
+# in quotes. Specifying "shell" will counteract the automatic
+# inclusion of built-in EFI shells.
+#
+#dont_scan_firmware HARDDISK,shell,"Removable Device"
 
 # Scan for Linux kernels that lack a ".efi" filename extension. This is
 # useful for better integration with Linux distributions that provide
@@ -399,12 +444,22 @@ timeout 5
 # that end in ".efi", particularly if the kernels are stored on a
 # filesystem that the EFI can read. When set to "1", "true", or "on", this
 # option causes all files in scanned directories with names that begin with
-# "vmlinuz" or "bzImage" to be included as loaders, even if they lack ".efi"
-# extensions. Passing this option a "0", "false", or "off" value causes
-# kernels without ".efi" extensions to NOT be scanned.
+# "vmlinuz", "bzImage", or "kernel" to be included as loaders, even if they
+# lack ".efi" extensions. Passing this option a "0", "false", or "off" value
+# causes kernels without ".efi" extensions to NOT be scanned.
 # Default is "true" -- to scan for kernels without ".efi" extensions.
 #
 #scan_all_linux_kernels false
+
+# Support loaders that have been compressed with gzip.
+# On x86 and x86-64 platforms, Linux kernels are self-decompressing.
+# On ARM64, Linux kernel files are typically compressed with gzip,
+# including the EFI stub loader. This makes them unloadable in rEFInd
+# unless rEFInd itself uncompresses them. This option enables rEFInd
+# to do this. This feature is unnecessary on x86 and x86-64 systems.
+# Default is "false" on x86 and x86-64; "true" on ARM64.
+#
+#support_gzipped_loaders true
 
 # Combine all Linux kernels in a given directory into a single entry.
 # When so set, the kernel with the most recent time stamp will be launched
@@ -414,6 +469,15 @@ timeout 5
 # Default is "true" -- kernels are "folded" into a single menu entry.
 #
 #fold_linux_kernels false
+
+# Filename prefixes that indicate a file is a Linux kernel. Files that
+# begin with any of these strings are treated as Linux kernels, if they
+# are also EFI boot loaders. To include the default string, use "+"
+# Default is "vmlinuz,bzImage,kernel", except on ARM64, where it is
+# "vmlinuz,Image,kernel".
+#
+#linux_prefixes vmlinuz,bzImage,kernel
+#linux_prefixes +,zImage
 
 # Comma-delimited list of strings to treat as if they were numbers for the
 # purpose of kernel version number detection. These strings are matched on a
@@ -433,6 +497,22 @@ timeout 5
 # Default is no extra version strings
 #
 #extra_kernel_version_strings linux-lts,linux
+
+# Write to systemd EFI variables (currently only LoaderDevicePartUUID) when
+# launching Linux via an EFI stub loader, ELILO, or GRUB. This variable,
+# when present, causes systemd to mount the ESP at /boot or /efi *IF* either
+# directory is empty and nothing else is mounted there.
+# Default is "false"
+#
+#write_systemd_vars true
+
+# Symlinked loaders will be processed when this setting is set to true.
+# These are ignored by default as they may result in undesirable outcomes.
+# This token may, however, be useful on Linux setups that provide symbolic
+# links in scanned locations that point to kernels in unscanned locations,
+# such as some openSUSE installations.
+#
+#follow_symlinks true
 
 # Set the maximum number of tags that can be displayed on the screen at
 # any time. If more loaders are discovered than this value, rEFInd shows
@@ -467,6 +547,7 @@ timeout 5
 # set different defaults for different times of day.
 # The default behavior is to boot the previously-booted OS.
 #
+default_selection "+"
 #default_selection 1
 #default_selection Microsoft
 #default_selection "+,bzImage,vmlinuz"
@@ -478,7 +559,7 @@ timeout 5
 # The symptom on Windows is Hyper-V not working even if the CPU
 # meets the minimum requirements (HW assisted virtualization and SLAT)
 # DO NOT SET THIS EXCEPT ON INTEL CPUs THAT SUPPORT VMX! See
-# http://www.thomas-krenn.com/en/wiki/Activating_the_Intel_VT_Virtualization_Feature!
+# http://www.thomas-krenn.com/en/wiki/Activating_the_Intel_VT_Virtualization_Feature
 # for more on this subject.
 # The default is false: Don't try to enable and lock the MSR.
 #
@@ -500,20 +581,25 @@ timeout 5
 #spoof_osx_version 10.9
 
 # Set the CSR values for Apple's System Integrity Protection (SIP) feature.
-# Values are one-byte (two-character) hexadecimal numbers. These values
+# Values are two-byte (four-character) hexadecimal numbers. These values
 # define which specific security features are enabled. Below are the codes
 # for what the values mean. Add them up (in hexadecimal!) to set new values.
 # Apple's "csrutil enable" and "csrutil disable" commands set values of 10
-# and 77, respectively.
-#   CSR_ALLOW_UNTRUSTED_KEXTS       0x01
-#   CSR_ALLOW_UNRESTRICTED_FS       0x02
-#   CSR_ALLOW_TASK_FOR_PID          0x04
-#   CSR_ALLOW_KERNEL_DEBUGGER       0x08
-#   CSR_ALLOW_APPLE_INTERNAL        0x10
-#   CSR_ALLOW_UNRESTRICTED_DTRACE   0x20
-#   CSR_ALLOW_UNRESTRICTED_NVRAM    0x40
-#
-#csr_values 10,77
+# and 877, respectively. (Prior to OS 11, 77 was used rather than 877; 877
+# is required for OS 11, and should work for OS X 10.x, too.)
+#   CSR_ALLOW_UNTRUSTED_KEXTS            0x0001
+#   CSR_ALLOW_UNRESTRICTED_FS            0x0002
+#   CSR_ALLOW_TASK_FOR_PID               0x0004
+#   CSR_ALLOW_KERNEL_DEBUGGER            0x0008
+#   CSR_ALLOW_APPLE_INTERNAL             0x0010
+#   CSR_ALLOW_UNRESTRICTED_DTRACE        0x0020
+#   CSR_ALLOW_UNRESTRICTED_NVRAM         0x0040
+#   CSR_ALLOW_DEVICE_CONFIGURATION       0x0080
+#   CSR_ALLOW_ANY_RECOVERY_OS            0x0100
+#   CSR_ALLOW_UNAPPROVED_KEXTS           0x0200
+#   CSR_ALLOW_EXECUTABLE_POLICY_OVERRIDE 0x0400
+#   CSR_ALLOW_UNAUTHENTICATED_ROOT       0x0800
+#csr_values 10,877
 
 # Include a secondary configuration file within this one. This secondary
 # file is loaded as if its options appeared at the point of the "include"
@@ -635,7 +721,7 @@ menuentry "Windows via shell script" {
     disabled
 }
 
-# Mac OS is normally detected and run automatically; however,
+# MacOS is normally detected and run automatically; however,
 # if you want to do something unusual, a manual boot stanza may
 # be the way to do it. This one does nothing very unusual, but
 # it may serve as a starting point. Note that you'll almost
@@ -648,7 +734,24 @@ menuentry "My macOS" {
     disabled
 }
 
+# The firmware_bootnum token takes a HEXADECIMAL value as an option
+# and sets that value using the EFI's BootNext variable and then
+# reboots the computer. This then causes a one-time boot of the
+# computer using this EFI boot option. It can be used for various
+# purposes, but one that's likely to interest some rEFInd users is
+# that some Macs with HiDPI displays produce lower-resolution
+# desktops when booted through rEFInd than when booted via Apple's
+# own boot manager. Booting using the firmware_bootnum option
+# produces the better resolution. Note that no loader option is
+# used in this type of configuration.
+menuentry "macOS via BootNext" {
+    icon /EFI/refind/icons/os_mac.png
+    firmware_bootnum 80
+    disabled
+}
+
 menuentry "GhostBSD" {
     loader \EFI\ghostbsd\bootx64.efi
     icon \EFI\refind\icons\os_ghostbsd.png
 }
+
