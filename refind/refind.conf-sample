@@ -753,5 +753,6 @@ menuentry "macOS via BootNext" {
 menuentry "GhostBSD" {
     loader \EFI\ghostbsd\bootx64.efi
     icon \EFI\refind\icons\os_ghostbsd.png
+    disabled
 }
 
